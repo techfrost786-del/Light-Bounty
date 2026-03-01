@@ -4,7 +4,7 @@
  */
 
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowUpRight, Check, Star, Zap, Camera, Clock, ShieldCheck, Mail, Phone, MapPin, Layers, Palette, Loader2, Instagram, X } from "lucide-react";
+import { ArrowUpRight, Check, Star, Zap, Camera, Clock, ShieldCheck, Mail, Phone, MapPin, Layers, Palette, Loader2, Instagram, X, Menu } from "lucide-react";
 import { useState, FormEvent } from "react";
 import { supabase } from "./lib/supabase";
 
@@ -28,47 +28,115 @@ const imageReveal = {
   transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] }
 };
 
-const Navbar = () => (
-  <motion.nav 
-    initial={{ y: -20, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    transition={{ duration: 0.8, ease: "easeOut" }}
-    className="grid grid-cols-3 items-center px-8 py-6 max-w-7xl mx-auto w-full sticky top-0 bg-white/80 backdrop-blur-md z-50"
-  >
-    <div className="flex items-center gap-8 text-sm font-medium text-brand-green/80">
-      {['About', 'Pricing'].map((item) => (
-        <a 
-          key={item} 
-          href={`#${item.toLowerCase()}`} 
-          className="relative group overflow-hidden"
-        >
-          <span className="block group-hover:-translate-y-full transition-transform duration-300">{item}</span>
-          <span className="absolute top-full left-0 block group-hover:-translate-y-full transition-transform duration-300 text-brand-green font-bold">{item}</span>
-        </a>
-      ))}
-    </div>
+const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    <div className="flex justify-center">
-      <motion.img 
-        whileHover={{ scale: 1.05 }}
-        src="https://lh3.googleusercontent.com/d/13qiLIl21HiJckr-RsVXL5HrzabSnJpaO" 
-        alt="Light Bounty Logo" 
-        className="h-10 w-auto object-contain"
-      />
-    </div>
+  const navLinks = [
+    { name: 'About', href: '#about' },
+    { name: 'Services', href: '#pricing' },
+  ];
 
-    <div className="flex justify-end">
-      <motion.a 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        href="#booking"
-        className="bg-brand-green text-brand-yellow px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-brand-green/10"
-      >
-        Book a Session
-      </motion.a>
-    </div>
-  </motion.nav>
-);
+  return (
+    <motion.nav 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="sticky top-0 bg-white/80 backdrop-blur-md z-50 w-full border-b border-brand-green/5"
+    >
+      <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between md:grid md:grid-cols-3">
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-brand-green/80">
+          {navLinks.map((item) => (
+            <a 
+              key={item.name} 
+              href={item.href} 
+              className="relative group overflow-hidden"
+            >
+              <span className="block group-hover:-translate-y-full transition-transform duration-300">{item.name}</span>
+              <span className="absolute top-full left-0 block group-hover:-translate-y-full transition-transform duration-300 text-brand-green font-bold">{item.name}</span>
+            </a>
+          ))}
+        </div>
+
+        {/* Logo */}
+        <div className="flex justify-start md:justify-center">
+          <motion.img 
+            whileHover={{ scale: 1.05 }}
+            src="https://lh3.googleusercontent.com/d/13qiLIl21HiJckr-RsVXL5HrzabSnJpaO" 
+            alt="Light Bounty Logo" 
+            className="h-10 w-auto object-contain cursor-pointer"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          />
+        </div>
+
+        {/* Desktop CTA */}
+        <div className="hidden md:flex justify-end">
+          <motion.a 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            href="#booking"
+            className="bg-brand-green text-brand-yellow px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-brand-green/10"
+          >
+            Book a Session
+          </motion.a>
+        </div>
+
+        {/* Mobile Hamburger */}
+        <div className="md:hidden flex items-center">
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 text-brand-green hover:bg-brand-green/5 rounded-lg transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 bg-brand-green/10 backdrop-blur-sm z-[-1] md:hidden"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="md:hidden bg-white border-t border-brand-green/5 overflow-hidden shadow-xl"
+            >
+              <div className="flex flex-col p-8 gap-6">
+                {navLinks.map((item) => (
+                  <a 
+                    key={item.name} 
+                    href={item.href} 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-lg font-semibold text-brand-green/80 hover:text-brand-green transition-colors py-3 min-h-[44px] flex items-center"
+                  >
+                    {item.name}
+                  </a>
+                ))}
+                <motion.a 
+                  whileTap={{ scale: 0.98 }}
+                  href="#booking"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-brand-green text-brand-yellow px-6 py-4 rounded-2xl text-center font-bold shadow-lg shadow-brand-green/10 mt-4 min-h-[44px] flex items-center justify-center"
+                >
+                  Book a Session
+                </motion.a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.nav>
+  );
+};
 
 const Hero = () => (
   <section className="px-6 py-12 max-w-7xl mx-auto overflow-hidden">
