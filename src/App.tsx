@@ -4,7 +4,7 @@
  */
 
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowUpRight, Check, Star, Zap, Camera, Clock, ShieldCheck, Mail, Phone, MapPin, Layers, Palette, Loader2 } from "lucide-react";
+import { ArrowUpRight, Check, Star, Zap, Camera, Clock, ShieldCheck, Mail, Phone, MapPin, Layers, Palette, Loader2, Instagram, X } from "lucide-react";
 import { useState, FormEvent } from "react";
 import { supabase } from "./lib/supabase";
 
@@ -383,9 +383,76 @@ const Pricing = () => {
   );
 };
 
+const SuccessModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-brand-green/20 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border border-brand-green/5 overflow-hidden"
+          >
+            <button 
+              onClick={onClose}
+              className="absolute top-6 right-6 p-2 rounded-full hover:bg-brand-green/5 transition-colors text-brand-green/40 hover:text-brand-green"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-brand-green/5 rounded-2xl flex items-center justify-center mb-8">
+                <Check className="w-8 h-8 text-brand-green" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-brand-green mb-4 leading-tight">
+                Thank you for reaching out.
+              </h3>
+              
+              <div className="space-y-4 text-brand-green/60 text-sm leading-relaxed mb-10">
+                <p>We’ve received your request, our team will email you shortly.</p>
+                <div className="flex flex-col items-center">
+                  <p>You can also connect on</p>
+                  <p>Instagram:</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col w-full gap-3">
+                <a 
+                  href="https://instagram.com/lightbounty" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full py-4 bg-brand-green text-brand-yellow rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                >
+                  <Instagram className="w-4 h-4" />
+                  Instagram
+                </a>
+                <button 
+                  onClick={onClose}
+                  className="w-full py-4 bg-brand-green/5 text-brand-green rounded-xl font-bold text-sm hover:bg-brand-green/10 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const Booking = () => {
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -397,6 +464,7 @@ const Booking = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
 
@@ -415,7 +483,7 @@ const Booking = () => {
 
       if (supabaseError) throw supabaseError;
 
-      setSubmitted(true);
+      setShowModal(true);
       setFormData({
         fullName: "",
         email: "",
@@ -432,61 +500,42 @@ const Booking = () => {
   };
 
   return (
-    <section id="booking" className="px-6 py-32 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
-        <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }}>
-          <span className="text-[10px] uppercase tracking-[0.4em] text-brand-green/40 mb-6 block font-bold">Booking</span>
-          <h2 className="text-5xl md:text-6xl font-bold text-brand-green leading-tight mb-10 tracking-tight">
-            Tailored <span className="font-italic-serif font-normal text-brand-green/60">Visual Sessions</span> <br />
-            for your Brand
-          </h2>
-          <p className="text-brand-green/70 text-base leading-relaxed mb-16 max-w-md">
-            Enjoy a personalized journey in our AI studio. These sessions offer complete flexibility—visit as many or as few concepts as you wish.
-          </p>
+    <>
+      <SuccessModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <section id="booking" className="px-6 py-32 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
+          <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }}>
+            <span className="text-[10px] uppercase tracking-[0.4em] text-brand-green/40 mb-6 block font-bold">Booking</span>
+            <h2 className="text-5xl md:text-6xl font-bold text-brand-green leading-tight mb-10 tracking-tight">
+              Tailored <span className="font-italic-serif font-normal text-brand-green/60">Visual Sessions</span> <br />
+              for your Brand
+            </h2>
+            <p className="text-brand-green/70 text-base leading-relaxed mb-16 max-w-md">
+              Enjoy a personalized journey in our AI studio. These sessions offer complete flexibility—visit as many or as few concepts as you wish.
+            </p>
 
-          <div className="space-y-8">
-            {[
-              { icon: Mail, text: "lightbountyy@gmail.com" },
-              { icon: MapPin, text: "Digital Studio, Global" }
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-6 group cursor-pointer">
-                <div className="w-12 h-12 rounded-2xl bg-brand-green/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-yellow transition-all">
-                  <item.icon className="w-5 h-5" />
+            <div className="space-y-8">
+              {[
+                { icon: Mail, text: "lightbountyy@gmail.com" },
+                { icon: MapPin, text: "Digital Studio, Global" }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-6 group cursor-pointer">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-green/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-yellow transition-all">
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-base font-medium text-brand-green/80">{item.text}</span>
                 </div>
-                <span className="text-base font-medium text-brand-green/80">{item.text}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+              ))}
+            </div>
+          </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="bg-white p-12 rounded-[4rem] shadow-2xl shadow-brand-green/5 border border-brand-green/5"
-        >
-          {submitted ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="h-full flex flex-col items-center justify-center text-center py-12"
-            >
-              <div className="w-20 h-20 bg-brand-green/5 rounded-full flex items-center justify-center mb-8">
-                <Check className="w-10 h-10 text-brand-green" />
-              </div>
-              <h3 className="text-3xl font-bold text-brand-green mb-4">Request Received!</h3>
-              <p className="text-brand-green/60 max-w-xs mb-8">
-                Thank you for reaching out. We'll review your requirements and get back to you within 24 hours.
-              </p>
-              <button 
-                onClick={() => setSubmitted(false)}
-                className="text-brand-green font-bold text-sm border-b-2 border-brand-green/20 pb-1 hover:border-brand-green transition-all"
-              >
-                Send another request
-              </button>
-            </motion.div>
-          ) : (
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="bg-white p-12 rounded-[4rem] shadow-2xl shadow-brand-green/5 border border-brand-green/5"
+          >
             <form className="space-y-8" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
@@ -573,10 +622,10 @@ const Booking = () => {
                 )}
               </motion.button>
             </form>
-          )}
-        </motion.div>
-      </div>
-    </section>
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 };
 
